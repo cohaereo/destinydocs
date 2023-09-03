@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Destiny 2 Steam Manifests</title>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+      integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.js"
+      integrity="sha512-Xo0Jh8MsOn72LGV8kU5LsclG7SUzJsWGhXbWcYs2MAmChkQzwiW/yTQwdJ8w6UA9C6EVG18GHb/TrYpYCjyAQw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css"
+      integrity="sha512-KXol4x3sVoO+8ZsWPFI/r5KBVB/ssCGB5tsv2nVOKwLg33wTFP3fmnXa47FdSVIshVTgsYk/1734xSk9aFIa4A=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+      integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <script>
+      const depotDownloaderTemplate =
+        "dotnet DepotDownloader.dll -app 1085660 -depot 1085661 -manifest ";
+      const depotDownloaderTemplateSuffix =
+        " -validate -username YOUR_USERNAME -password YOUR_PASSWORD";
+
+      const steamdbUrlTemplate =
+        "https://steamdb.info/depot/1085661/history/?changeid=M:";
+
+      function stripIsoTime(s) {
+        return s.split("T")[0];
+      }
+
+      function generateButtons(manifest) {
+        return `
+        <div class="inline ui" data-tooltip="Download using SteamDepotDownloader">
+          <a class="no-decoration" href="#" onclick="openSDDModal(${manifest})"><i class="fa-solid fa-download"></i></a>
+        </div>
+        <div class="inline ui" data-tooltip="View on SteamDB">
+          <a class="no-decoration" href="${
+            steamdbUrlTemplate + manifest
+          }" target="_blank"><i class="fa-brands fa-steam"></i></a>
+        </div>
+        `;
+      }
+
+      function openSDDModal(manifest) {
+        $("#sdd-command").html(
+          depotDownloaderTemplate + manifest + depotDownloaderTemplateSuffix
+        );
+        $("#sdd-modal").modal("show");
+      }
+
+      function openManifestsModal(manifestsEncoded) {
+        const manifests = JSON.parse(decodeURI(manifestsEncoded));
+
+        $("#manifests-list").empty();
+
+        manifests.forEach((m) => {
+          const comment = m["comment"] ? ` - ${m["comment"]}` : "";
+          $("#manifests-list").append(
+            `${m.id}${comment} (${stripIsoTime(m.date)}) ${generateButtons(
+              m.id
+            )}</br>`
+          );
+        });
+
+        $("#manifests-modal").modal("show");
+      }
+
+      $(document).ready(function () {
+        $.getJSON("manifests.json", function (manifests) {
+          $("#mtbody").empty();
+
+          manifests.forEach((x) => {
+            console.log(x);
+
+            const firstManifest = x.manifests[0];
+            const lastManifest = x.manifests[x.manifests.length - 1];
+            const row = `
+              <tr>
+                <td data-label="Name">${x.expansion}</td>
+                <td data-label="Date">${stripIsoTime(x.date)}</td>
+                <td data-label="First manifest">${
+                  firstManifest.id
+                } (${stripIsoTime(firstManifest.date)}) ${generateButtons(
+              firstManifest.id
+            )}</td>
+                <td data-label="Last manifest">${
+                  lastManifest.id
+                } (${stripIsoTime(lastManifest.date)}) ${generateButtons(
+              lastManifest.id
+            )}</td>
+                <td data-label="Actions"><a href="#" onclick="openManifestsModal('${encodeURI(
+                  JSON.stringify(x.manifests)
+                )}')">Show all</a></td>
+              </tr>
+            `;
+
+            $("#mtbody").append(row);
+          });
+        });
+      });
+    </script>
+
+    <style>
+      .no-decoration {
+        text-decoration: none;
+        color: #000;
+      }
+
+      .inline {
+        display: inline;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="ui vertical masthead center aligned segment container">
+      <div class="ui text">
+        <h1 class="ui header">Destiny 2 Steam Manifests</h1>
+      </div>
+
+      <div class="ui divider"></div>
+
+      <div class="ui">
+        <div class="ui inverted dimmer">
+          <div class="ui text loader">Loading</div>
+        </div>
+
+        <table class="ui celled table">
+          <thead>
+            <tr>
+              <th>Expansion</th>
+              <th>Date</th>
+              <th>First manifest</th>
+              <th>Last manifest</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="mtbody">
+            <tr>
+              <td data-label="Name">Shadowkeep</td>
+              <td data-label="Date">2019-10-01T16:20:39Z</td>
+              <td data-label="First manifest">7002268313830901797</td>
+              <td data-label="Last manifest">4160053308690659072</td>
+              <td data-label="Actions">Show all</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="manifests-modal" class="ui modal">
+        <div class="header">All Manifests</div>
+        <div class="content">
+          <div class="ui inverted segment">
+            <code id="manifests-list" class="ui bash"> </code>
+          </div>
+        </div>
+        <div class="actions">
+          <div class="ui black deny button">Close</div>
+        </div>
+      </div>
+
+      <div id="sdd-modal" class="ui modal">
+        <div class="header">Download using SteamDepotDownloader</div>
+        <div class="content">
+          To download this manifest, you need to use
+          <a
+            href="https://github.com/SteamRE/DepotDownloader"
+            target="_blank"
+            all
+            >SteamDepotDownloader</a
+          >.
+          <div class="ui inverted segment">
+            <code id="sdd-command" class="ui bash"
+              >dotnet DepotDownloader.dll -app 1085660 -depot 1085661 -manifest
+              7002268313830901797 -validate -username YOUR_USERNAME -password
+              YOUR_PASSWORD</code
+            >
+          </div>
+        </div>
+        <div class="actions">
+          <div class="ui black deny button">Close</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
