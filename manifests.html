@@ -1,206 +1,266 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Destiny 2 Steam Manifests</title>
 
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
-      integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Destiny 2 Steam Manifests</title>
 
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.js"
-      integrity="sha512-Xo0Jh8MsOn72LGV8kU5LsclG7SUzJsWGhXbWcYs2MAmChkQzwiW/yTQwdJ8w6UA9C6EVG18GHb/TrYpYCjyAQw=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+    integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css"
-      integrity="sha512-KXol4x3sVoO+8ZsWPFI/r5KBVB/ssCGB5tsv2nVOKwLg33wTFP3fmnXa47FdSVIshVTgsYk/1734xSk9aFIa4A=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.js"
+    integrity="sha512-Xo0Jh8MsOn72LGV8kU5LsclG7SUzJsWGhXbWcYs2MAmChkQzwiW/yTQwdJ8w6UA9C6EVG18GHb/TrYpYCjyAQw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
-      integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css"
+    integrity="sha512-KXol4x3sVoO+8ZsWPFI/r5KBVB/ssCGB5tsv2nVOKwLg33wTFP3fmnXa47FdSVIshVTgsYk/1734xSk9aFIa4A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    <script>
-      const depotDownloaderTemplate =
-        "dotnet DepotDownloader.dll -app 1085660 -depot 1085661 -manifest ";
-      const depotDownloaderTemplateSuffix =
-        " -validate -username YOUR_USERNAME -password YOUR_PASSWORD";
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-      const steamdbUrlTemplate =
-        "https://steamdb.info/depot/1085661/history/?changeid=M:";
+  <script>
+    const depotDownloaderTemplate =
+      "dotnet DepotDownloader.dll -app 1085660 -depot {0} -manifest {1} -validate -username YOUR_USERNAME -password YOUR_PASSWORD";
 
-      function stripIsoTime(s) {
-        return s.split("T")[0];
-      }
+    const steamdbUrlTemplate =
+      "https://steamdb.info/depot/{0}/history/?changeid=M:{1}";
 
-      function generateButtons(manifest, color = "#000") {
-        return `
+    const languageCodes = {
+      "en": "🇺🇸 English",
+      "fr": "🇫🇷 French",
+      "de": "🇩🇪 German",
+      "it": "🇮🇹 Italian",
+      "jp": "🇯🇵 Japanese",
+      "pt": "🇵🇹 Portuguese",
+      "es": "🇪🇸 Spanish",
+      "ru": "🇷🇺 Russian",
+      "pl": "🇵🇱 Polish",
+      "zh-hans": "🇨🇳 Chinese (Simplified)",
+      "zh-hant": "🇨🇳 Chinese (Traditional)",
+      "es-latam": "🇧🇷 Latin American Spanish",
+      "ko": "🇰🇷 Korean",
+    };
+
+    const languageDepots = {
+      "en": 1085662,
+      "fr": 1085663,
+      "de": 1085664,
+      "it": 1085665,
+      "jp": 1085666,
+      "pt": 1085667,
+      "es": 1085668,
+      "ru": 1085669,
+      "pl": 1085670,
+      "cs": 1085671,
+      "ct": 1085672,
+      "mx": 1085673,
+      "ko": 1085674,
+    }
+
+    // Formatting helper
+    if (!String.prototype.format) {
+      String.prototype.format = function () {
+        var args = arguments;
+        return this.replace(/{(\d+)}/g, function (match, number) {
+          return typeof args[number] != 'undefined'
+            ? args[number]
+            : match
+            ;
+        });
+      };
+    }
+
+    function stripIsoTime(s) {
+      return s.split("T")[0];
+    }
+
+    function generateButtons(manifest, color = "#000", depot = 1085661) {
+      return `
         <div class="inline ui" data-tooltip="Download using SteamDepotDownloader">
-          <a class="no-decoration" style="color: ${color}" href="#" onclick="openSDDModal(${manifest})"><i class="fa-solid fa-download"></i></a>
+          <a class="no-decoration" style="color: ${color}" href="#" onclick="openSDDModal(${manifest}, ${depot})"><i class="fa-solid fa-download"></i></a>
         </div>
         <div class="inline ui" data-tooltip="View on SteamDB">
-          <a class="no-decoration" style="color: ${color}" href="${
-          steamdbUrlTemplate + manifest
-        }" target="_blank"><i class="fa-brands fa-steam"></i></a>
+          <a class="no-decoration" style="color: ${color}" href="${steamdbUrlTemplate.format(depot, manifest)}" target="_blank"><i class="fa-brands fa-steam"></i></a>
         </div>
         `;
-      }
+    }
 
-      function openSDDModal(manifest) {
-        $("#sdd-command").html(
-          depotDownloaderTemplate + manifest + depotDownloaderTemplateSuffix
+    function openSDDModal(manifest, depot = 1085661) {
+      // TODO: Alternative window title for languages would be cool here (include the language + flag from languageCodes)
+      $("#sdd-command").html(depotDownloaderTemplate.format(depot, manifest));
+      $("#sdd-modal").modal("show");
+    }
+
+    function openManifestsModal(manifestsEncoded) {
+      const manifests = JSON.parse(decodeURI(manifestsEncoded));
+
+      $("#manifests-list").empty();
+
+      manifests.forEach((m) => {
+        const comment = m["comment"] ? ` - ${m["comment"]}` : "";
+
+        const languageManifestData = encodeURI(
+          JSON.stringify(m.language_manifests)
         );
-        $("#sdd-modal").modal("show");
+        const languageButton = m["language_manifests"] ? `<div class="inline ui" data-tooltip="Show language depots">
+            <a class="no-decoration" style="color: #fff" href="#" onclick="openLanguagesModal('${languageManifestData}')"><i class="fa-solid fa-language"></i></a>
+          </div>` : '';
+
+        $("#manifests-list").append(
+          `${m.id}${comment} (${stripIsoTime(m.date)}) ${generateButtons(
+            m.id,
+            "#fff"
+          )}
+          ${languageButton}
+          </br>`
+        );
+      });
+
+      $("#manifests-modal").modal("show");
+    }
+
+    function openLanguagesModal(manifestsEncoded) {
+      const languages = JSON.parse(decodeURI(manifestsEncoded));
+
+      $("#languages-list").empty();
+
+      console.log(languages);
+      for (const [key, value] of Object.entries(languages)) {
+        $("#languages-list").append(
+          `${value} - ${languageCodes[key]} ${generateButtons(
+            value,
+            "#fff",
+            languageDepots[key]
+          )}</br>`
+        );
       }
 
-      function openManifestsModal(manifestsEncoded) {
-        const manifests = JSON.parse(decodeURI(manifestsEncoded));
+      $("#languages-modal").modal("show");
+    }
 
-        $("#manifests-list").empty();
+    $(document).ready(function () {
+      $.getJSON("manifests.json", function (manifests) {
+        $("#mtbody").empty();
 
-        manifests.forEach((m) => {
-          const comment = m["comment"] ? ` - ${m["comment"]}` : "";
-          $("#manifests-list").append(
-            `${m.id}${comment} (${stripIsoTime(m.date)}) ${generateButtons(
-              m.id,
-              "#fff"
-            )}</br>`
-          );
-        });
+        manifests.forEach((x) => {
+          console.log(x);
 
-        $("#manifests-modal").modal("show");
-      }
-
-      $(document).ready(function () {
-        $.getJSON("manifests.json", function (manifests) {
-          $("#mtbody").empty();
-
-          manifests.forEach((x) => {
-            console.log(x);
-
-            const firstManifest = x.manifests[0];
-            const lastManifest = x.manifests[x.manifests.length - 1];
-            const row = `
+          const firstManifest = x.manifests[0];
+          const lastManifest = x.manifests[x.manifests.length - 1];
+          const row = `
               <tr>
                 <td data-label="Name">${x.expansion}</td>
                 <td data-label="Date">${stripIsoTime(x.date)}</td>
-                <td data-label="First manifest">${
-                  firstManifest.id
-                } (${stripIsoTime(firstManifest.date)}) ${generateButtons(
+                <td data-label="First manifest">${firstManifest.id
+            } (${stripIsoTime(firstManifest.date)}) ${generateButtons(
               firstManifest.id
             )}</td>
-                <td data-label="Last manifest">${
-                  lastManifest.id
-                } (${stripIsoTime(lastManifest.date)}) ${generateButtons(
+                <td data-label="Last manifest">${lastManifest.id
+            } (${stripIsoTime(lastManifest.date)}) ${generateButtons(
               lastManifest.id
             )}</td>
                 <td data-label="Actions"><a href="#" onclick="openManifestsModal('${encodeURI(
-                  JSON.stringify(x.manifests)
-                )}')">Show all</a></td>
+              JSON.stringify(x.manifests)
+            )}')">Show all</a></td>
               </tr>
             `;
 
-            $("#mtbody").append(row);
-          });
+          $("#mtbody").append(row);
         });
       });
-    </script>
+    });
+  </script>
 
-    <style>
-      .no-decoration {
-        text-decoration: none;
-      }
+  <style>
+    .no-decoration {
+      text-decoration: none;
+    }
 
-      .inline {
-        display: inline;
-      }
-    </style>
-  </head>
+    .inline {
+      display: inline;
+    }
+  </style>
+</head>
 
-  <body>
-    <div class="ui vertical masthead center aligned segment container">
-      <div class="ui text">
-        <h1 class="ui header">Destiny 2 Steam Manifests</h1>
+<body>
+  <div class="ui vertical masthead center aligned segment container">
+    <div class="ui text">
+      <h1 class="ui header">Destiny 2 Steam Manifests</h1>
+    </div>
+
+    <div class="ui divider"></div>
+
+    <div class="ui">
+      <div class="ui inverted dimmer">
+        <div class="ui text loader">Loading</div>
       </div>
 
-      <div class="ui divider"></div>
+      <table class="ui celled table">
+        <thead>
+          <tr>
+            <th>Expansion</th>
+            <th>Date</th>
+            <th>First manifest</th>
+            <th>Last manifest</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="mtbody">
+          <tr>
+            <td data-label="Name">Shadowkeep</td>
+            <td data-label="Date">2019-10-01T16:20:39Z</td>
+            <td data-label="First manifest">7002268313830901797</td>
+            <td data-label="Last manifest">4160053308690659072</td>
+            <td data-label="Actions">Show all</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-      <div class="ui">
-        <div class="ui inverted dimmer">
-          <div class="ui text loader">Loading</div>
-        </div>
-
-        <table class="ui celled table">
-          <thead>
-            <tr>
-              <th>Expansion</th>
-              <th>Date</th>
-              <th>First manifest</th>
-              <th>Last manifest</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="mtbody">
-            <tr>
-              <td data-label="Name">Shadowkeep</td>
-              <td data-label="Date">2019-10-01T16:20:39Z</td>
-              <td data-label="First manifest">7002268313830901797</td>
-              <td data-label="Last manifest">4160053308690659072</td>
-              <td data-label="Actions">Show all</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div id="manifests-modal" class="ui modal">
-        <div class="header">All Manifests</div>
-        <div class="content">
-          <div class="ui inverted segment">
-            <code id="manifests-list" class="ui bash"> </code>
-          </div>
-        </div>
-        <div class="actions">
-          <div class="ui black deny button">Close</div>
+    <div id="manifests-modal" class="ui modal">
+      <div class="header">All Manifests</div>
+      <div class="content">
+        <div class="ui inverted segment">
+          <code id="manifests-list" class="ui bash"> </code>
         </div>
       </div>
-
-      <div id="sdd-modal" class="ui modal">
-        <div class="header">Download using SteamDepotDownloader</div>
-        <div class="content">
-          To download this manifest, you need to use
-          <a
-            href="https://github.com/SteamRE/DepotDownloader"
-            target="_blank"
-            all
-            >SteamDepotDownloader</a
-          >.
-          <div class="ui inverted segment">
-            <code id="sdd-command" class="ui bash"
-              >dotnet DepotDownloader.dll -app 1085660 -depot 1085661 -manifest
-              7002268313830901797 -validate -username YOUR_USERNAME -password
-              YOUR_PASSWORD</code
-            >
-          </div>
-        </div>
-        <div class="actions">
-          <div class="ui black deny button">Close</div>
-        </div>
+      <div class="actions">
+        <div class="ui black deny button">Close</div>
       </div>
     </div>
-  </body>
+
+    <div id="sdd-modal" class="ui modal">
+      <div class="header">Download using SteamDepotDownloader</div>
+      <div class="content">
+        To download this manifest, you need to use
+        <a href="https://github.com/SteamRE/DepotDownloader" target="_blank" all>SteamDepotDownloader</a>.
+        <div class="ui inverted segment">
+          <code id="sdd-command" class="ui bash">dotnet DepotDownloader.dll -app 1085660 -depot 1085661 -manifest
+              7002268313830901797 -validate -username YOUR_USERNAME -password
+              YOUR_PASSWORD</code>
+        </div>
+      </div>
+      <div class="actions">
+        <div class="ui black deny button">Close</div>
+      </div>
+    </div>
+
+    <div id="languages-modal" class="ui modal">
+      <div class="header">All Language Depots for this Manifest</div>
+      <div class="content">
+        <div class="ui inverted segment">
+          <code id="languages-list" class="ui bash"> </code>
+        </div>
+      </div>
+      <div class="actions">
+        <div class="ui black deny button">Close</div>
+      </div>
+    </div>
+  </div>
+</body>
+
 </html>
