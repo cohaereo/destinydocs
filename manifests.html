@@ -81,7 +81,7 @@
     function generateButtons(manifest, color = "#000", depot = 1085661) {
       return `
         <div class="inline ui" data-tooltip="Download using SteamDepotDownloader">
-          <a class="no-decoration" style="color: ${color}" href="#" onclick="openSDDModal(${manifest}, ${depot})"><i class="fa-solid fa-download"></i></a>
+          <a class="no-decoration" style="color: ${color}" href="#" onclick="openSDDModal('${manifest}', ${depot})"><i class="fa-solid fa-download"></i></a>
         </div>
         <div class="inline ui" data-tooltip="View on SteamDB">
           <a class="no-decoration" style="color: ${color}" href="${steamdbUrlTemplate.format(depot, manifest)}" target="_blank"><i class="fa-brands fa-steam"></i></a>
